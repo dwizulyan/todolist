@@ -1,68 +1,81 @@
-const btnAdd = document.querySelector(".add");
-const btnDelete = document.querySelector(".delete");
-const todoValue = document.querySelector(".input").value;
-const todoWrapper = document.querySelector(".item-wrapper");
-
-var deleteIsAvailable = false;
-
-const todo = JSON.parse(localStorage.getItem("data"));
-if (todo !== null) {
-  todo.forEach((element, index) => {
-    todoWrapper.innerHTML += `
-        <div class="item">
-            <p class="item-title">${element.name}</p>
-            <button onclick="deleteItem('${index}')" class="delete">X</button>
-        </div>
-    `;
-  });
+// Load user name from local storage or prompt for it
+if (!localStorage.getItem("name")) {
+  const name = prompt("Siapa Nama anda ?");
+  localStorage.setItem("name", name);
 }
-btnAdd.addEventListener("click", (e) => {
-  e.preventDefault();
-  // Get the HTML Element
-  const todoValue = document.querySelector(".input").value;
-  const todoWrapper = document.querySelector(".item-wrapper");
 
-  // Insert the data to local storage
-  if (localStorage.getItem("data") !== null) {
-    const data = JSON.parse(localStorage.getItem("data"));
-    data.push({
-      name: todoValue,
-    });
-
-    localStorage.setItem("data", JSON.stringify(data));
+// Set up hamburger menu
+const NAVIGATION_MENU_HEIGHT = "30px";
+const hamburgerButton = document.querySelector(".hamburger");
+const navigationMenu = document.querySelector(".nav-menu");
+const navigationItem = document.querySelector(".change-name");
+hamburgerButton.addEventListener("click", function () {
+  if (navigationMenu.style.height === NAVIGATION_MENU_HEIGHT) {
+    navigationMenu.style.height = "0";
+    navigationItem.style.display = "none";
   } else {
-    const data = [
-      {
-        name: todoValue,
-      },
-    ];
-    localStorage.setItem("data", JSON.stringify(data));
+    navigationMenu.style.height = NAVIGATION_MENU_HEIGHT;
+    navigationItem.style.display = "block";
   }
-  todoWrapper.innerHTML = "";
-  const todo = JSON.parse(localStorage.getItem("data"));
-  if (todo !== null) {
-    todo.forEach((element, index) => {
-      todoWrapper.innerHTML += `
-          <div class="item">
-              <p class="item-title">${element.name}</p>
-              <button onclick="deleteItem('${index}')" class="delete">X</button>
-          </div>
-      `;
-    });
-  }
-  if (btnDelete === null) {
-    deleteIsAvailable = true;
-  }
-  console.log(deleteIsAvailable);
 });
 
-function deleteItem(value) {
-  const data = JSON.parse(localStorage.getItem("data"));
-  const deleted = data
-    .filter((data) => data.name === value)
-    .map((data) => data.name);
+// Set up todo list
+const btnAdd = document.querySelector(".add");
+const btnDelete = document.querySelector(".delete");
+const input = document.querySelector(".input");
+const itemWrapper = document.querySelector(".item-wrapper");
+const title = document.querySelector(".title");
+title.innerHTML = `${localStorage.getItem("name")}'s Todo List`;
 
-  data.splice(value, 1);
-  localStorage.setItem("data", JSON.stringify(data));
+function renderTodoList() {
+  const todo = JSON.parse(localStorage.getItem("data")) || [];
+  itemWrapper.innerHTML = todo
+    .map(
+      (element, index) => `
+    <div class="item">
+      <p class="item-title">${element.name}</p>
+      <button onclick="deleteItem(${index})" class="delete">X</button>
+    </div>
+  `
+    )
+    .join("");
+}
+
+btnAdd.addEventListener("click", function (e) {
+  e.preventDefault();
+  const todoValue = input.value.trim();
+  if (!todoValue) return;
+  const todo = JSON.parse(localStorage.getItem("data")) || [];
+  todo.push({ name: todoValue });
+  localStorage.setItem("data", JSON.stringify(todo));
+  input.value = "";
+  renderTodoList();
+});
+
+function deleteItem(index) {
+  const todo = JSON.parse(localStorage.getItem("data")) || [];
+  todo.splice(index, 1);
+  localStorage.setItem("data", JSON.stringify(todo));
+  renderTodoList();
+}
+
+function gantiNama() {
+  promptNamaBaru();
+}
+
+function promptNamaBaru() {
+  let newName = prompt("Ganti nama anda dengan nama baru anda :");
+
+  while (newName.trim() === "") {
+    alert("nama tidak boleh kosong");
+    newName = prompt("Ganti nama anda dengan nama baru anda :");
+  }
+
+  localStorage.setItem("name", newName);
   window.location.href = "/";
 }
+
+// Render initial todo list
+renderTodoList();
+
+// testing
