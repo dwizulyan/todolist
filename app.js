@@ -72,7 +72,7 @@ function promptNamaBaru() {
   }
 
   localStorage.setItem("name", newName);
-  window.location.href = "/";
+  window.location.reload();
 }
 
 // Render initial todo list
